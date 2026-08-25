@@ -21,31 +21,55 @@ class BggCollectionItem {
 
 /// Client für die BoardGameGeek XMLAPI2, Collection-Endpoint.
 ///
+/// Seit Ende Oktober 2025 verlangt BGG für die XML-API einen registrierten
+/// Bearer-Token (siehe https://boardgamegeek.com/using_the_xml_api) – auch
+/// für den eigenen, öffentlichen Collection-Abruf. Der Token wird als
+/// `Authorization: Bearer <token>`-Header mitgeschickt.
+///
 /// BGG beantwortet eine frische Collection-Anfrage oft zunächst mit
 /// HTTP 202 ("Anfrage wird verarbeitet") und liefert die eigentlichen
 /// Daten erst bei einem erneuten Abruf kurz danach – daher der Retry-Loop.
 class BggService {
   static const _baseUrl = 'https://boardgamegeek.com/xmlapi2/collection';
 
+  final String? apiToken;
+  BggService({this.apiToken});
+
   Future<List<BggCollectionItem>> fetchCollection(
     String username, {
     int maxRetries = 6,
     Duration retryDelay = const Duration(seconds: 3),
   }) async {
+    if (apiToken == null || apiToken!.trim().isEmpty) {
+      throw const BggSyncException(
+        'Kein BGG-API-Token hinterlegt. BGG verlangt seit Ende Oktober 2025 '
+        'einen Authorization-Token für die XML-API – bitte unter '
+        'boardgamegeek.com/using_the_xml_api registrieren und den Token in '
+        'den Einstellungen bzw. der .env eintragen.',
+      );
+    }
+
     final uri = Uri.parse(
       '$_baseUrl?username=${Uri.encodeQueryComponent(username)}'
       '&own=1&stats=1&showprivate=1',
     );
+    final headers = {'Authorization': 'Bearer $apiToken'};
 
     http.Response? response;
     for (var attempt = 0; attempt < maxRetries; attempt++) {
-      response = await http.get(uri);
+      response = await http.get(uri, headers: headers);
       if (response.statusCode == 200) {
         break;
       }
       if (response.statusCode == 202) {
         await Future.delayed(retryDelay);
         continue;
+      }
+      if (response.statusCode == 401 || response.statusCode == 403) {
+        throw BggSyncException(
+          'BGG hat den Zugriff verweigert (HTTP ${response.statusCode}). '
+          'Bitte prüfen, ob der BGG-API-Token noch gültig ist.',
+        );
       }
       throw BggSyncException(
         'BGG-Sync fehlgeschlagen (HTTP ${response.statusCode}) für Nutzer "$username".',

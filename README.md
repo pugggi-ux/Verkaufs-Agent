@@ -25,14 +25,21 @@ Die vollständige fachliche Spezifikation steht in [`SPEC_v1.md`](./SPEC_v1.md).
 4. Unter *Project Settings → API* die **Project URL** und den **anon public key**
    kopieren.
 
-### 2. Flutter-App konfigurieren
+### 2. BGG-API-Token
+
+Seit Ende Oktober 2025 verlangt BGG für die XML-API (auch für die eigene
+Sammlung) einen registrierten Authorization-Token. Registrierung und Token
+unter [boardgamegeek.com/using_the_xml_api](https://boardgamegeek.com/using_the_xml_api)
+beantragen.
+
+### 3. Flutter-App konfigurieren
 
 ```bash
 cp .env.example .env
-# .env mit den Werten aus Schritt 1 sowie dem eigenen BGG-Benutzernamen befüllen
+# .env mit den Werten aus Schritt 1 + 2 sowie dem eigenen BGG-Benutzernamen befüllen
 ```
 
-### 3. Abhängigkeiten installieren & starten
+### 4. Abhängigkeiten installieren & starten
 
 ```bash
 flutter pub get
@@ -40,7 +47,7 @@ flutter run -d chrome     # Web
 flutter run                # Android/iOS-Gerät bzw. Emulator
 ```
 
-### 4. Web-Release-Build
+### 5. Web-Release-Build
 
 ```bash
 flutter build web --release

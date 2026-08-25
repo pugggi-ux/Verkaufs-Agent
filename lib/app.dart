@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/provider.dart';
 
 import 'providers/app_data_provider.dart';
@@ -58,7 +59,7 @@ class _AuthGate extends StatelessWidget {
         todoRepo: TodoRepository(client),
         listingRepo: ListingRepository(client),
         settingsRepo: SettingsRepository(client),
-        bggService: BggService(),
+        bggService: BggService(apiToken: dotenv.env['BGG_API_TOKEN']),
       )..loadAll(),
       child: const HomeScreen(),
     );
