@@ -36,7 +36,7 @@ Sammlung) einen registrierten Authorization-Token. Registrierung unter
 Für den automatischen Import von `pricepaid` (Kaufpreis) wird zusätzlich eine
 eingeloggte BGG-Session benötigt — dafür Benutzername + Passwort.
 
-Diese drei Werte werden **nicht** in der App/`.env` hinterlegt, sondern als
+Diese drei Werte werden **nicht** in der App/`app.env` hinterlegt, sondern als
 Secrets der Edge Function (siehe Schritt 3) — so verlassen Passwort und Token
 nie den Server, insbesondere nicht das öffentlich ausgelieferte Web-Bundle.
 
@@ -62,9 +62,14 @@ Ohne `BGG_PASSWORD` funktioniert der Sync trotzdem (Name/Cover/Status), nur
 ### 4. Flutter-App konfigurieren
 
 ```bash
-cp .env.example .env
-# .env mit den Werten aus Schritt 1 befüllen (nur Supabase URL + anon key)
+cp app.env.example app.env
+# app.env mit den Werten aus Schritt 1 befüllen (nur Supabase URL + anon key)
 ```
+
+Der Dateiname `app.env` (statt `.env`) ist bewusst gewählt: viele Static-Hoster
+(z.B. Netlify) schließen versteckte Dateien (die mit `.` beginnen) standardmäßig
+vom Deploy aus – als Flutter-Web-Asset ausgeliefert würde eine `.env`-Datei dort
+sonst mit 404 fehlen und die App bliebe beim Start hängen.
 
 ### 5. Abhängigkeiten installieren & starten
 

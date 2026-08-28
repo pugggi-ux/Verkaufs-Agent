@@ -6,7 +6,7 @@ import 'services/supabase_service.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await dotenv.load(fileName: '.env');
+  await dotenv.load(fileName: 'app.env');
 
   final url = dotenv.env['SUPABASE_URL'];
   final anonKey = dotenv.env['SUPABASE_ANON_KEY'];
@@ -32,7 +32,7 @@ class _KonfigurationsFehlerApp extends StatelessWidget {
             padding: const EdgeInsets.all(24),
             child: Text(
               'SUPABASE_URL / SUPABASE_ANON_KEY fehlen.\n'
-              'Bitte eine .env-Datei (siehe .env.example) im Projektwurzelverzeichnis anlegen.',
+              'Bitte eine app.env-Datei (siehe app.env.example) im Projektwurzelverzeichnis anlegen.',
               textAlign: TextAlign.center,
             ),
           ),

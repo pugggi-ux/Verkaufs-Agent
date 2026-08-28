@@ -45,8 +45,11 @@ app.*.map.json
 /android/app/release
 
 # Secrets
-.env
+app.env
 *.iml
 
 # Supabase CLI local metadata
 supabase/.temp/
+
+# Netlify CLI local metadata
+.netlify/
