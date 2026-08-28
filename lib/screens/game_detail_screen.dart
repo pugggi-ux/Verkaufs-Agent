@@ -139,6 +139,40 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
                     ),
                   ],
                 ),
+                if (game.isExpansion)
+                  const Padding(
+                    padding: EdgeInsets.only(top: 8),
+                    child: Chip(label: Text('Erweiterung')),
+                  ),
+                if (!game.isExpansion && provider.expansionsOf(game).isNotEmpty)
+                  _Abschnitt(
+                    titel: 'Erweiterungen',
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Gebundenes Kapital (Basisspiel + Erweiterungen): '
+                          '${provider.gebundenesKapital(game).toStringAsFixed(2)} €',
+                          style: Theme.of(context).textTheme.titleSmall,
+                        ),
+                        const SizedBox(height: 8),
+                        for (final e in provider.expansionsOf(game))
+                          ListTile(
+                            dense: true,
+                            contentPadding: EdgeInsets.zero,
+                            title: Text(e.name),
+                            subtitle: e.kaufpreis != null
+                                ? Text('Kaufpreis: ${e.kaufpreis!.toStringAsFixed(2)} €')
+                                : null,
+                            onTap: () => Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (_) => GameDetailScreen(gameId: e.id),
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
                 const SizedBox(height: 20),
                 _Abschnitt(
                   titel: 'Kaufpreis & Kaufdatum',

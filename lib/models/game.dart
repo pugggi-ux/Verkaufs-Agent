@@ -23,6 +23,8 @@ class Game {
   final double? angebotspreis;
   final String? zustand;
   final String? verkaufstext;
+  final String subtype;
+  final String? expansionOfGameId;
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -42,9 +44,13 @@ class Game {
     this.angebotspreis,
     this.zustand,
     this.verkaufstext,
+    this.subtype = 'boardgame',
+    this.expansionOfGameId,
     required this.createdAt,
     required this.updatedAt,
   });
+
+  bool get isExpansion => subtype == 'boardgameexpansion';
 
   bool get hatRecherche => rechercheMin != null && rechercheMax != null;
 
@@ -81,19 +87,10 @@ class Game {
       angebotspreis: (map['angebotspreis'] as num?)?.toDouble(),
       zustand: map['zustand'] as String?,
       verkaufstext: map['verkaufstext'] as String?,
+      subtype: map['subtype'] as String? ?? 'boardgame',
+      expansionOfGameId: map['expansion_of_game_id'] as String?,
       createdAt: DateTime.parse(map['created_at'] as String),
       updatedAt: DateTime.parse(map['updated_at'] as String),
     );
-  }
-
-  Map<String, dynamic> toInsertMap(String userId) {
-    return {
-      'user_id': userId,
-      'bgg_id': bggId,
-      'name': name,
-      'cover_image_url': coverImageUrl,
-      'kaufpreis': kaufpreis,
-      'kaufdatum': kaufdatum?.toIso8601String().substring(0, 10),
-    };
   }
 }

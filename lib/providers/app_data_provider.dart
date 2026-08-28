@@ -37,8 +37,31 @@ class AppDataProvider extends ChangeNotifier {
   bool syncingBgg = false;
   String? bggSyncMessage;
 
-  List<Game> get zumEntscheiden =>
-      games.where((g) => g.status == GameStatus.unentschieden).toList();
+  /// Erweiterungen entscheiden sich nicht separat – ihr Status folgt dem
+  /// Basisspiel (siehe [decide]). Der Swipe-Stapel zeigt daher nur
+  /// Basisspiele.
+  List<Game> get zumEntscheiden => games
+      .where((g) => g.status == GameStatus.unentschieden && !g.isExpansion)
+      .toList();
+
+  List<Game> expansionsOf(Game baseGame) =>
+      games.where((g) => g.expansionOfGameId == baseGame.id).toList();
+
+  /// Summe aus Kaufpreis des Basisspiels und aller eigenen Erweiterungen –
+  /// das gesamte gebundene Kapital, falls beim Verkauf alles zusammen geht.
+  double gebundenesKapital(Game baseGame) {
+    var summe = baseGame.kaufpreis ?? 0;
+    for (final e in expansionsOf(baseGame)) {
+      summe += e.kaufpreis ?? 0;
+    }
+    return summe;
+  }
+
+  /// Basisspiele mit gegebenem Status, gruppiert mit ihren (ggf. noch
+  /// unentschiedenen) Erweiterungen – für die genestete Sammlung-Ansicht.
+  List<Game> baseGamesByStatus(GameStatus status) => games
+      .where((g) => g.status == status && !g.isExpansion)
+      .toList();
 
   List<Game> get zumVerkauf =>
       games.where((g) => g.status == GameStatus.verkaufen).toList();
@@ -75,23 +98,17 @@ class AppDataProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<bool> syncBgg({String? usernameOverride}) async {
-    final username = usernameOverride ?? settings?.bggUsername;
-    if (username == null || username.trim().isEmpty) {
-      error = 'Bitte zuerst einen BGG-Benutzernamen in den Einstellungen eintragen.';
-      notifyListeners();
-      return false;
-    }
+  /// Ruft die Edge-Function `bgg-sync` auf, die serverseitig bei BGG
+  /// einloggt (für private Felder wie pricepaid) und die Sammlung abgleicht.
+  Future<bool> syncBgg() async {
     syncingBgg = true;
     error = null;
     bggSyncMessage = null;
     notifyListeners();
     try {
-      final items = await bggService.fetchCollection(username);
-      final neu = await gameRepo.syncFromBgg(userId, items);
+      final result = await bggService.syncCollection();
       await refreshGames();
-      bggSyncMessage =
-          '$neu neue Spiele importiert, ${items.length} insgesamt abgeglichen.';
+      bggSyncMessage = result.zusammenfassung;
       return true;
     } catch (e) {
       error = e.toString();
@@ -102,8 +119,14 @@ class AppDataProvider extends ChangeNotifier {
     }
   }
 
+  /// Setzt den Status eines Spiels. Bei einem Basisspiel wird derselbe
+  /// Status automatisch auf alle eigenen Erweiterungen übertragen, da diese
+  /// beim Verkauf/Behalten typischerweise zusammen mit dem Basisspiel gehen.
   Future<void> decide(Game game, GameStatus status) async {
     await gameRepo.updateStatus(game.id, status);
+    if (!game.isExpansion) {
+      await gameRepo.cascadeStatusToExpansions(game.id, status);
+    }
     await refreshGames();
   }
 
@@ -191,10 +214,5 @@ class AppDataProvider extends ChangeNotifier {
     await settingsRepo.update(newSettings);
     settings = newSettings;
     notifyListeners();
-  }
-
-  Future<void> updateGameField(String gameId, Future<void> Function() write) async {
-    await write();
-    await refreshGames();
   }
 }
