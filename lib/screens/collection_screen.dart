@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../models/game.dart';
 import '../providers/app_data_provider.dart';
+import '../utils/image_url.dart';
 import 'game_detail_screen.dart';
 
 class CollectionScreen extends StatelessWidget {
@@ -169,7 +170,7 @@ class _Cover extends StatelessWidget {
       child: url != null
           ? ClipRRect(
               borderRadius: BorderRadius.circular(6),
-              child: Image.network(url!, fit: BoxFit.cover),
+              child: Image.network(corsProxiedImageUrl(url)!, fit: BoxFit.cover),
             )
           : Container(color: Theme.of(context).colorScheme.surfaceContainerHighest),
     );

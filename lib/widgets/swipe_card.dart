@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../models/game.dart';
+import '../utils/image_url.dart';
 
 enum SwipeDecision { behalten, verkaufen, spaeter }
 
@@ -87,7 +88,7 @@ class _SwipeCardState extends State<SwipeCard>
                 Positioned.fill(
                   child: widget.game.coverImageUrl != null
                       ? Image.network(
-                          widget.game.coverImageUrl!,
+                          corsProxiedImageUrl(widget.game.coverImageUrl)!,
                           fit: BoxFit.cover,
                           errorBuilder: (_, __, ___) => Container(
                             color: theme.colorScheme.surfaceContainerHighest,
@@ -108,10 +109,25 @@ class _SwipeCardState extends State<SwipeCard>
                         colors: [Colors.transparent, Colors.black87],
                       ),
                     ),
-                    child: Text(
-                      widget.game.name,
-                      style: theme.textTheme.titleLarge
-                          ?.copyWith(color: Colors.white, fontWeight: FontWeight.bold),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          widget.game.name,
+                          style: theme.textTheme.titleLarge
+                              ?.copyWith(color: Colors.white, fontWeight: FontWeight.bold),
+                        ),
+                        if (widget.game.kaufpreis != null)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 4),
+                            child: Text(
+                              'Kaufpreis: ${widget.game.kaufpreis!.toStringAsFixed(2)} €',
+                              style: theme.textTheme.bodyMedium
+                                  ?.copyWith(color: Colors.white70),
+                            ),
+                          ),
+                      ],
                     ),
                   ),
                 ),

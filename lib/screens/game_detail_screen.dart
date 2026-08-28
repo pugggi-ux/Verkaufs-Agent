@@ -8,6 +8,7 @@ import '../models/listing.dart';
 import '../models/todo.dart';
 import '../providers/app_data_provider.dart';
 import '../services/sales_text_generator.dart';
+import '../utils/image_url.dart';
 import '../widgets/price_range_bar.dart';
 import '../widgets/todo_checklist.dart';
 
@@ -127,7 +128,7 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
                     if (game.coverImageUrl != null)
                       ClipRRect(
                         borderRadius: BorderRadius.circular(8),
-                        child: Image.network(game.coverImageUrl!,
+                        child: Image.network(corsProxiedImageUrl(game.coverImageUrl)!,
                             width: 80, height: 80, fit: BoxFit.cover),
                       ),
                     const SizedBox(width: 12),

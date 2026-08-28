@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../models/game.dart';
 import '../providers/app_data_provider.dart';
+import '../utils/image_url.dart';
 import '../widgets/swipe_card.dart';
 
 class SwipeScreen extends StatefulWidget {
@@ -167,7 +168,7 @@ class _StaticCardPreview extends StatelessWidget {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: SizedBox.expand(
         child: game.coverImageUrl != null
-            ? Image.network(game.coverImageUrl!, fit: BoxFit.cover)
+            ? Image.network(corsProxiedImageUrl(game.coverImageUrl)!, fit: BoxFit.cover)
             : Container(color: Theme.of(context).colorScheme.surfaceContainerHighest),
       ),
     );
